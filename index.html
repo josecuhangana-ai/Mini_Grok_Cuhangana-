@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Groki Cuhangana</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+        h1 {
+            color: #ff4d6d;
+        }
+        textarea {
+            width: 100%;
+            max-width: 600px;
+            height: 120px;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        select, button {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        button {
+            background: #ff4d6d;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #ff2a4a;
+        }
+        #progressContainer {
+            width: 100%;
+            max-width: 600px;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        #progressBar {
+            height: 100%;
+            width: 0%;
+            background: #ff4d6d;
+            transition: width 0.3s;
+        }
+        video {
+            margin-top: 20px;
+            max-width: 100%;
+            border-radius: 10px;
+            border: 2px solid #ff4d6d;
+        }
+        .footer {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mini Groki Cuhangana</h1>
+    <textarea id="prompt" placeholder="Digite aqui o prompt da cena, personagens, ações, etc..."></textarea>
+    <br>
+    <label>Duração do vídeo:</label>
+    <select id="duration">
+        <option value="30">30s</option>
+        <option value="60">1 min</option>
+        <option value="120">2 min</option>
+        <option value="300">5 min</option>
+        <option value="600">10 min</option>
+    </select>
+    <br>
+    <button onclick="generateVideo()">Gerar Vídeo</button>
+
+    <div id="progressContainer">
+        <div id="progressBar"></div>
+    </div>
+
+    <video id="videoOutput" controls></video>
+
+    <div class="footer">
+        Desenvolvido por Cuhangana. Mini Groki para criar vídeos cinematográficos simples.
+    </div>
+
+    <script>
+        // Insira sua API Key gratuita do Pika Labs aqui
+        const PIKA_API_KEY = 'SUA_API_KEY_AQUI';
+
+        const promptInput = document.getElementById('prompt');
+        const durationSelect = document.getElementById('duration');
+        const progressBar = document.getElementById('progressBar');
+        const videoOutput = document.getElementById('videoOutput');
+
+        function updateProgress(value) {
+            progressBar.style.width = value + '%';
+        }
+
+        async function generateVideo() {
+            const prompt = promptInput.value.trim();
+            const duration = parseInt(durationSelect.value, 10);
+
+            if (!prompt) {
+                alert('Digite um prompt antes de gerar o vídeo!');
+                return;
+            }
+
+            // Reset
+            videoOutput.src = '';
+            updateProgress(0);
+
+            // Simulação inicial de progresso
+            updateProgress(20);
+
+            try {
+                // Chamada à API do Pika Labs
+                const response = await fetch('https://api.pikalabs.com/v1/video/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${PIKA_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        duration: duration,
+                        resolution: '1080p',
+                        style: 'cinematic'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro na API: ' + response.statusText);
+                }
+
+                updateProgress(50);
+
+                const data = await response.json();
+                // Pika Labs retorna URL do vídeo gerado
+                const videoUrl = data.video_url;
+
+                // Simular carregamento
+                updateProgress(80);
+                setTimeout(() => {
+                    videoOutput.src = videoUrl;
+                    videoOutput.play();
+                    updateProgress(100);
+                }, 1000);
+
+            } catch (err) {
+                console.error(err);
+                alert('Ocorreu um erro ao gerar o vídeo: ' + err.message);
+                updateProgress(0);
+            }
+        }
+    </script>
+</body>
+</html>
